@@ -1,6 +1,6 @@
 using namespace std;
 
-// use stochastic or batches of 10 training
+// use stochastic learning or batches of 10
 // layers = 784, 32, 28, 10
 // for each pixel, input = val/128 - 1
 // add twisting term ax to sigmoid
