@@ -2,14 +2,14 @@ using namespace std;
 
 class Matrix{
 private:
-  vector<int> dims;
-  vector<float>* values;
+  vector<int> dims;        // dimensions of matrix in format Rows, Columns
+  vector<float>* values;        // pointer to values in matrix
 public:
-  Matrix(int cols, int rows){
+  Matrix(int cols, int rows){     // dimensions determined in constructor
     dims.push_back(rows);
     dims.push_back(cols);
     values = new vector<float>;
-    values->assign(rows*cols,0)
+    values->assign(rows*cols,0);
   }
   int get_rows() const{
     return dims[0];
@@ -24,7 +24,16 @@ public:
     (*values)[dims[1]*row + col] = val;
   }
 
-  void add(const Matrix* other){
+  void load_random(){
+    default_random_engine g;
+    normal_distribution<float> rand(0, pow(dims[1],-0.5));
+
+    for(int i=0; i<values->size(); i++){
+      (*values)[i] = rand(g);
+    }
+  }
+
+  void add(const Matrix* other){           // add other matrix to self
     for(int j=0; j<dims[0]; j++){
       for(int i=0; i<dims[1]; i++){
         (*values)[j*dims[1] + i] += other->get_value(i,j);
@@ -32,7 +41,7 @@ public:
     }
   }
 
-  void multiply(const Matrix* other){
+  void multiply(const Matrix* other){        // self = other * self
     vector<int> output_dims;
     vector<float>* output_values;
     output_dims.push_back(other->get_rows());
@@ -43,12 +52,20 @@ public:
     for(int k=0; k<output_dims[1]; k++){
       for(int j=0; j<output_dims[0]; j++){
         for(int i=0; i<dims[1]; i++){
-          (*output_values)[j*output_dims[1]+k] += (*values)[dims[1]*i+k] * other->get_value(j,i);
+          (*output_values)[j*output_dims[1]+k] += (*values)[dims[1]*i+k] * other->get_value(i,j);
         }
       }
     }
     dims = output_dims;
     delete[] values;
     values = output_values;
+  }
+
+  void print(ostream &dst){
+    for(int i=0; i<values->size(); i++){
+      if(i%dims[1]==0){dst << '[' << ' ';}
+      dst << (*values)[i] << ' ';
+      if((i+1)%dims[1]==0){dst << ']' << endl;}
+    }
   }
 };

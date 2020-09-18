@@ -28,6 +28,20 @@ public:
   void clear(){
     pixels.assign(width*height, 0);
   }
+
+  void load_from_matrix(Matrix* a){
+    width = a->get_cols();
+    height = a->get_rows();
+    pixels.assign(width*height, 0);
+    max_val = 255;
+
+    for(int j=0; j<height; j++){
+      for(int i=0; i<width; i++){
+        pixels[j*width+i] = min(max((int)((a->get_value(i,j)+1)*128),0),255);
+      }
+    }
+  }
+
   void to_pgm(int scale) const{         // saves image as a pgm file
     cout << "P2" << endl;
     cout << width*scale << " " << height*scale << endl;
