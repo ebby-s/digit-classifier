@@ -1,6 +1,6 @@
 using namespace std;
 
-// TODO add definition for train
+// TODO store derivatives in matrices
 
 // use stochastic learning or batches of 10
 // layers = 784, 32, 28, 10
@@ -11,11 +11,14 @@ using namespace std;
 float sigmoid(float x){
   return 1.7159 * tanh(x*2/3);
 }
+float sigmoid_gradient(float x){
+  return 1.1439 * pow(1/cosh(x*2/3), 2);
+}
 
-float calculate_loss(vector<float> y_hat, vector<float> y){
+float calculate_loss(Matrix* y_hat, Matrix* y){
   float loss = 0;
-  for(int i=0; i<y.size(); i++){
-    loss += pow((y[i] - y_hat[i]), 2);
+  for(int i=0; i<10; i++){
+    loss += pow((y->get_value(0,i) - y_hat->get_value(0,i)), 2);
   }
   return loss;
 }
@@ -54,13 +57,78 @@ public:
     layers.push_back(size);
   }
 
-  Matrix predict(Matrix x) const{
-    for(int i=0; i<layers.size(); i++){
-      x.multiply(weight[i]);
-      x.add(bias[i]);
+  void predict(Matrix* x) const{         // passes input x through network
+    for(int i=0; i<layers.size()-1; i++){
+      x->multiply(weight[i]);
+      x->add(bias[i]);
+      for(int j=0; j<layers[i+1]; j++){
+        x->set_value(0, j, sigmoid(x->get_value(0, j)));
+      }
     }
-    return x;
   }
 
-  float train(vector<Matrix*> x, vector<int> y);
+  void train(Matrix* x, Matrix* y){
+    vector<Matrix*> a, z;
+    Matrix y_hat(x->get_cols(), x->get_rows());
+    vector<float> dadz, dzda, dadw, next_dadz;
+    float layer_learn_rate;
+
+    y_hat = *x;
+
+    for(int i=0; i<layers.size()-1; i++){
+      y_hat.multiply(weight[i]);
+      y_hat.add(bias[i]);
+      a.push_back(new Matrix(y_hat));
+      for(int j=0; j<layers[i+1]; j++){
+        y_hat.set_value(0, j, sigmoid(y_hat.get_value(0, j)));
+      }
+      z.push_back(new Matrix(y_hat));
+    }
+
+    dadz.assign(layers.back(),0);
+    for(int i=0; i<layers.back(); i++){
+      dadz[i] = 2*(z.back()->get_value(0,i) - y->get_value(0,1));
+    }
+
+    for(int i=layers.size()-1; i>0; i--){
+      layer_learn_rate = learning_rate * pow(layers[i-1], 0.5);
+
+      dzda.assign(layers[i],0);
+      for(int j=0; j<layers[i]; j++){
+        dzda[j] = sigmoid_gradient(a[i-1]->get_value(0, j));
+      }
+
+      dadw.assign(layers[i-1], 0);
+      for(int j=0; j<layers[i-1]; j++){
+        if(i==1){
+          dadw[j] = x->get_value(0,j);
+        }else{
+          dadw[j] = z[i-2]->get_value(0,j);
+        }
+      }
+
+      if(i!=1){
+        next_dadz.assign(layers[i-1], 0);
+        for(int j=0; j<layers[i-1]; j++){
+          for(int k=0; k<layers[i]; k++){
+            next_dadz[j] += weight[i-1]->get_value(j, k);
+          }
+        }
+      }
+
+      for(int j=0; j<layers[i]; j++){
+        bias[i-1]->set_value(0, j, bias[i-1]->get_value(0, j) - dadz[j] * dzda[j] * layer_learn_rate);
+        for(int k=0; k<layers[i-1]; k++){
+          weight[i-1]->set_value(k, j, weight[i-1]->get_value(k, j) - dadz[j] * dzda[j] * dadw[k] * layer_learn_rate);
+        }
+      }
+
+      dadz = next_dadz;
+    }
+
+    for(int i=0; i<a.size(); i++){
+      delete a[i];
+      delete z[i];
+    }
+  }
 };

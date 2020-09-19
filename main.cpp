@@ -27,17 +27,30 @@ int main(){
   }
   Dataset data(files, 1000, 800);
 
-  Matrix* a;
-  Matrix* b;
+  vector<Matrix*> test_batch, train_batch;
+  Matrix* x, *y, *y_hat;
+  y = new Matrix(1, 10);
 
-  a = new Matrix(1,4);
-  a->load_random();
-  a->print(cout);
-  cout << endl;
-  b = new Matrix(4,3);
-  b->load_random();
-  b->print(cout);
-  cout << endl;
-  a->multiply(b);
-  a->print(cout);
+  vector<float> losses;
+
+  for(int i=0; i<100; i++){
+    losses.assign(10,0);
+    train_batch = data.get_training_batch();
+    if(i%100==0){test_batch = data.get_testing_batch();}
+
+    for(int k=0; k<10; k++){
+      for(int j=0; j<10; j++){
+        y->set_value(0,j,(float)(k==j));
+      }
+      x = train_batch[k];
+      if(i%100==0){
+        y_hat = test_batch[k];
+        model.predict(y_hat);
+        losses[k] = calculate_loss(y_hat, y);
+        cout << losses[k] << endl;
+      }
+      model.train(x, y);
+    }
+  }
+  cout << accumulate(losses.begin(), losses.end(), 0)/losses.size() << endl;
 }

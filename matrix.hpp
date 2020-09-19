@@ -11,6 +11,15 @@ public:
     values = new vector<float>;
     values->assign(rows*cols,0);
   }
+  Matrix(const Matrix &obj){
+    dims = obj.dims;
+    values = new vector<float>;
+    values->assign(dims[0] * dims[1], 0);
+    for(int i=0; i<values->size(); i++){
+      (*values)[i] = (*(obj.values))[i];
+    }
+  }
+
   int get_rows() const{
     return dims[0];
   }
