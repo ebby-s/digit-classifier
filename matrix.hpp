@@ -51,13 +51,13 @@ public:
 
     for(int k=0; k<output_dims[1]; k++){
       for(int j=0; j<output_dims[0]; j++){
-        for(int i=0; i<dims[1]; i++){
+        for(int i=0; i<dims[0]; i++){
           (*output_values)[j*output_dims[1]+k] += (*values)[dims[1]*i+k] * other->get_value(i,j);
         }
       }
     }
     dims = output_dims;
-    delete[] values;
+    delete values;
     values = output_values;
   }
 
