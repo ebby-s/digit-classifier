@@ -11,9 +11,7 @@
 using namespace std;
 
 int main(){
-  Frame frame(28, 28, 255);
-
-  MLP model(784, 0.01);
+  MLP model(784, 0.0001);
   model.add_layer(32);
   model.add_layer(28);
   model.add_layer(10);
@@ -27,30 +25,44 @@ int main(){
   }
   Dataset data(files, 1000, 800);
 
-  vector<Matrix*> test_batch, train_batch;
+  vector<Matrix*> testing_batch, training_batch, y_batch;
   Matrix* x, *y, *y_hat;
-  y = new Matrix(1, 10);
 
+  for(int k=0; k<10; k++){
+    y = new Matrix(1, 10);
+    for(int j=0; j<10; j++){ y->set_value(0,j,(float)(k==j)); }
+    y_batch.push_back(y);
+  }
+
+  Frame debug_frame(28, 28, 255);
   vector<float> losses;
+  losses.assign(10,0);
 
-  for(int i=0; i<100; i++){
-    losses.assign(10,0);
-    train_batch = data.get_training_batch();
-    if(i%100==0){test_batch = data.get_testing_batch();}
+  for(int i=0; i<1; i++){
 
-    for(int k=0; k<10; k++){
-      for(int j=0; j<10; j++){
-        y->set_value(0,j,(float)(k==j));
-      }
-      x = train_batch[k];
-      if(i%100==0){
-        y_hat = test_batch[k];
+    if(i%1==0){
+      testing_batch = data.get_testing_batch();
+      for(int k=0; k<10; k++){
+        y = y_batch[k];
+        y_hat = testing_batch[k];
         model.predict(y_hat);
         losses[k] = calculate_loss(y_hat, y);
-        cout << losses[k] << endl;
+        delete y_hat;
       }
-      model.train(x, y);
+      cerr << accumulate(losses.begin(), losses.end(), 0)/losses.size() << endl;
     }
+
+    training_batch = data.get_training_batch();
+    model.train_batch(training_batch, y_batch);
   }
-  cout << accumulate(losses.begin(), losses.end(), 0)/losses.size() << endl;
+
+  y_hat = model.get_weight(0);
+  debug_frame.load_from_matrix(y_hat);
+  debug_frame.to_pgm(2);
+  y_hat = data.get_testing_digit(5);
+  for(int j=0; j<10; j++){
+    y->set_value(0,j,(float)(j==5));
+  }
+  model.predict(y_hat);
+  y_hat->print(cerr);
 }

@@ -1,3 +1,3 @@
 g++ main.cpp -o main
 
-./main
+./main > test.pgm

@@ -11,7 +11,7 @@ public:
     values = new vector<float>;
     values->assign(rows*cols,0);
   }
-  Matrix(const Matrix &obj){
+  Matrix(const Matrix &obj){       // copy constructor
     dims = obj.dims;
     values = new vector<float>;
     values->assign(dims[0] * dims[1], 0);
@@ -19,7 +19,17 @@ public:
       (*values)[i] = (*(obj.values))[i];
     }
   }
-
+  ~Matrix(){           // deconstructor
+    delete values;
+  }
+  Matrix& operator=(const Matrix &obj){    // assignment operator overloaded
+    dims = obj.dims;
+    values = new vector<float>;
+    values->assign(dims[0] * dims[1], 0);
+    for(int i=0; i<values->size(); i++){
+      (*values)[i] = (*(obj.values))[i];
+    }
+  }
   int get_rows() const{
     return dims[0];
   }
@@ -33,7 +43,7 @@ public:
     (*values)[dims[1]*row + col] = val;
   }
 
-  void load_random(){
+  void load_random(){          // loads matrix with random values
     default_random_engine g;
     normal_distribution<float> rand(0, pow(dims[1],-0.5));
 
@@ -70,7 +80,7 @@ public:
     values = output_values;
   }
 
-  void print(ostream &dst){
+  void print(ostream &dst){               // prints matrix to ostream
     for(int i=0; i<values->size(); i++){
       if(i%dims[1]==0){dst << '[' << ' ';}
       dst << (*values)[i] << ' ';

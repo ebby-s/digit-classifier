@@ -19,11 +19,11 @@ public:
   int get_width() const{
     return width;
   }
-  int get_pixel(vector<int> location) const{
-    return pixels[location[1]*width + location[0]];
+  int get_pixel(int posx, int posy) const{
+    return pixels[posy*width + posx];
   }
-  void set_pixel(vector<int> location, int val){
-    pixels[location[1]*width + location[0]] = val;
+  void set_pixel(int posx, int posy, int val){
+    pixels[posy*width + posx] = val;
   }
   void clear(){
     pixels.assign(width*height, 0);
@@ -39,6 +39,17 @@ public:
       for(int i=0; i<width; i++){
         pixels[j*width+i] = min(max((int)((a->get_value(i,j)+1)*128),0),255);
       }
+    }
+  }
+
+  void load_from_vector(vector<float> x){
+    width = x.size();
+    height = 1;
+    pixels.assign(width, 0);
+    max_val = 255;
+
+    for(int j=0; j<width; j++){
+      pixels[j] = min(max((int)((x[j]+1)*128),0),255);
     }
   }
 
