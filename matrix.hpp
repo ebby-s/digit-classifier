@@ -3,17 +3,17 @@ using namespace std;
 class Matrix{
 private:
   vector<int> dims;        // dimensions of matrix in format Rows, Columns
-  vector<float>* values;        // pointer to values in matrix
+  vector<double>* values;        // pointer to values in matrix
 public:
   Matrix(int cols, int rows){     // dimensions determined in constructor
     dims.push_back(rows);
     dims.push_back(cols);
-    values = new vector<float>;
+    values = new vector<double>;
     values->assign(rows*cols,0);
   }
   Matrix(const Matrix &obj){       // copy constructor
     dims = obj.dims;
-    values = new vector<float>;
+    values = new vector<double>;
     values->assign(dims[0] * dims[1], 0);
     for(int i=0; i<values->size(); i++){
       (*values)[i] = (*(obj.values))[i];
@@ -24,7 +24,7 @@ public:
   }
   Matrix& operator=(const Matrix &obj){    // assignment operator overloaded
     dims = obj.dims;
-    values = new vector<float>;
+    values = new vector<double>;
     values->assign(dims[0] * dims[1], 0);
     for(int i=0; i<values->size(); i++){
       (*values)[i] = (*(obj.values))[i];
@@ -36,10 +36,10 @@ public:
   int get_cols() const{
     return dims[1];
   }
-  float get_value(int col, int row) const{
+  double get_value(int col, int row) const{
     return (*values)[dims[1]*row + col];
   }
-  void set_value(int col, int row, float val){
+  void set_value(int col, int row, double val){
     (*values)[dims[1]*row + col] = val;
   }
 
@@ -63,10 +63,10 @@ public:
 
   void multiply(const Matrix* other){        // self = other * self
     vector<int> output_dims;
-    vector<float>* output_values;
+    vector<double>* output_values;
     output_dims.push_back(other->get_rows());
     output_dims.push_back(dims[1]);
-    output_values = new vector<float>;
+    output_values = new vector<double>;
     output_values->assign(other->get_rows()*dims[1],0);
 
     for(int k=0; k<output_dims[1]; k++){

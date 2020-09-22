@@ -1,16 +1,10 @@
 using namespace std;
 
-// TODO train with mini-batches of 10
+double sigmoid(double x){return 1.0/(1.0 + exp(-x));}        // sigmoid used as activation function
+double sigmoid_gradient(double y){return y * (1.0-y);}     // derivative of sigmoid function
 
-// use stochastic learning or batches of 10
-// layers = 784, 32, 28, 10
-// for each pixel, input = val/128 - 1
-
-float sigmoid(float x){return 1.0/(1.0 + exp(-x));}        // sigmoid used as activation function
-float sigmoid_gradient(float y){return y * (1.0-y);}     // derivative of sigmoid function
-
-float tanh_sigmoid(float x){return 1.7159 * tanh(x*2/3);}    // tanh sigmoids to compare
-float tanh_sigmoid_gradient(float x){return 1.1439 * pow(1/cosh(x*2/3), 2);}
+double tanh_sigmoid(double x){return 1.7159 * tanh(x*2/3);}    // tanh sigmoids to compare
+double tanh_sigmoid_gradient(double x){return 1.1439 * pow(1/cosh(x*2/3), 2);}
 
 float calculate_loss(Matrix* y_hat, Matrix* y){   // calculates loss for one training batch
   float loss = 0;
@@ -25,10 +19,10 @@ private:
   vector<Matrix*> weight;    // weights of each layer
   vector<Matrix*> delta_weight;      // change to weights every train cycle
   vector<int> layers;     // size of each layer
-  float learning_rate;
-  float momentum;
+  double learning_rate;
+  double momentum;
 public:
-  MLP(int input_layer, float new_learning_rate, float new_momentum){
+  MLP(int input_layer, double new_learning_rate, double new_momentum){
     layers.push_back(input_layer);
     learning_rate = new_learning_rate;
     momentum = new_momentum;
@@ -59,8 +53,7 @@ public:
 
   void train(Matrix* x, Matrix* y, int n_cycles){
     vector<Matrix*> z, a;            // holds results from forward pass
-    vector<float> dzdw, dzdz, next_dzdz;       // holds derivatives
-    float layer_learn_rate;             // holds adjusted learning rate for each layer
+    vector<double> dzdw, dzdz, next_dzdz;       // holds derivatives
     Matrix y_hat(28, 28);
 
     for(int n=0; n<n_cycles; n++){     // iterate over batch size n
@@ -84,8 +77,6 @@ public:
 
       for(int i=layers.size()-1; i>0; i--){     // repeat for each layer
 
-        layer_learn_rate = learning_rate;// * pow(layers[i-1], 0.5);     // adjusted learning rate for deeper layers
-
         dzdw.assign(layers[i-1], 0);           // calculate derivative of z with respect to weights
         for(int j=0; j<layers[i-1]; j++){
           dzdw[j] = a[i-1]->get_value(0,j);
@@ -103,7 +94,7 @@ public:
 
         for(int j=0; j<layers[i]; j++){          // accumulate changes to weights and biases
           for(int k=0; k<layers[i-1]; k++){
-            delta_weight[i-1]->set_value(k, j, momentum * delta_weight[i-1]->get_value(k, j) - dzdz[j] * dzdw[k] * layer_learn_rate);
+            delta_weight[i-1]->set_value(k, j, momentum * delta_weight[i-1]->get_value(k, j) - dzdz[j] * dzdw[k] * learning_rate);
           }
         }
         weight[i-1]->add(delta_weight[i-1]);
