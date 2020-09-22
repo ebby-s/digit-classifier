@@ -53,7 +53,7 @@ public:
     for(int j=0; j<next_train_sample.size(); j++){
       sample = new Matrix(1,784);
       for(int i=0; i<784; i++){
-        sample->set_value(0, i, (((float)(*train_data)[j*test_train_split*784 + next_train_sample[j]*784 + i])/128.0) -1.0);
+        sample->set_value(0, i, ((float)(*train_data)[j*test_train_split*784 + next_train_sample[j]*784 + i])/255.0);
       }
       batch.push_back(sample);
       next_train_sample[j] = (next_train_sample[j]+1) % test_train_split;
@@ -65,7 +65,7 @@ public:
     Matrix* sample;
     sample = new Matrix(1,784);
     for(int i=0; i<784; i++){
-      sample->set_value(0, i, (((float)((*train_data)[digit*test_train_split*784 + next_train_sample[digit]*784 + i]))/128.0) -1.0);
+      sample->set_value(0, i, ((float)((*train_data)[digit*test_train_split*784 + next_train_sample[digit]*784 + i]))/255.0);
     }
     next_train_sample[digit] = (next_train_sample[digit]+1) % test_train_split;
     return sample;
@@ -77,7 +77,7 @@ public:
     for(int j=0; j<next_test_sample.size(); j++){
       sample = new Matrix(1,784);
       for(int i=0; i<784; i++){
-        sample->set_value(0, i, (((float)(*test_data)[j*(label_split-test_train_split)*784 + next_test_sample[j]*784 + i])/128.0) -1.0);
+        sample->set_value(0, i, ((float)(*test_data)[j*(label_split-test_train_split)*784 + next_test_sample[j]*784 + i])/255.0);
       }
       batch.push_back(sample);
       next_test_sample[j] = (next_test_sample[j]+1) % (label_split-test_train_split);
@@ -89,7 +89,7 @@ public:
     Matrix* sample;
     sample = new Matrix(1,784);
     for(int i=0; i<784; i++){
-      sample->set_value(0, i, (((float)(*test_data)[digit*(label_split-test_train_split)*784 + next_test_sample[digit]*784 + i])/128.0) -1.0);
+      sample->set_value(0, i, ((float)(*test_data)[digit*(label_split-test_train_split)*784 + next_test_sample[digit]*784 + i])/255.0);
     }
     next_test_sample[digit] = (next_test_sample[digit]+1) % (label_split-test_train_split);
     return sample;

@@ -44,12 +44,13 @@ public:
   }
 
   void load_random(){          // loads matrix with random values
-    default_random_engine g;
-    normal_distribution<float> rand(0, pow(dims[1],-0.5));
-
     for(int i=0; i<values->size(); i++){
-      (*values)[i] = rand(g);
+      (*values)[i] = (rand()%2) * (rand()%6)/10;
     }
+  }
+
+  void clear(){         // sets all values to zero
+    values->assign(dims[0]*dims[1], 0);
   }
 
   void add(const Matrix* other){           // add other matrix to self

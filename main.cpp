@@ -11,9 +11,8 @@
 using namespace std;
 
 int main(){
-  MLP model(784, 0.0001);
-  model.add_layer(32);
-  model.add_layer(28);
+  MLP model(784, 0.00001, 0.7);
+  model.add_layer(128);
   model.add_layer(10);
 
   vector<string> files;
@@ -25,44 +24,34 @@ int main(){
   }
   Dataset data(files, 1000, 800);
 
-  vector<Matrix*> testing_batch, training_batch, y_batch;
   Matrix* x, *y, *y_hat;
-
-  for(int k=0; k<10; k++){
-    y = new Matrix(1, 10);
-    for(int j=0; j<10; j++){ y->set_value(0,j,(float)(k==j)); }
-    y_batch.push_back(y);
-  }
+  y = new Matrix(1, 10);
+  int sample_digit;
 
   Frame debug_frame(28, 28, 255);
   vector<float> losses;
   losses.assign(10,0);
 
-  for(int i=0; i<1; i++){
 
-    if(i%1==0){
-      testing_batch = data.get_testing_batch();
-      for(int k=0; k<10; k++){
-        y = y_batch[k];
-        y_hat = testing_batch[k];
-        model.predict(y_hat);
-        losses[k] = calculate_loss(y_hat, y);
-        delete y_hat;
-      }
-      cerr << accumulate(losses.begin(), losses.end(), 0)/losses.size() << endl;
+  for(int i=0; i<100; i++){        // main loop i
+    sample_digit = rand()%10;
+    for(int l=0; l<10; l++){y->set_value(0,l,(float)(sample_digit==l));}
+    x = data.get_training_digit(sample_digit);
+    model.train(x, y, 500);
+    model.clear_momentum();
+
+    if(i%8==0){
+      y_hat = data.get_testing_digit((sample_digit+3)%10);
+      model.predict(y_hat);
+      //cerr << i << ' ' << calculate_loss(y_hat, y) << endl;
+      cerr << i << ' ' << sample_digit << endl;
+      y_hat->print(cerr);
+      delete y_hat;
     }
-
-    training_batch = data.get_training_batch();
-    model.train_batch(training_batch, y_batch);
   }
 
   y_hat = model.get_weight(0);
   debug_frame.load_from_matrix(y_hat);
   debug_frame.to_pgm(2);
-  y_hat = data.get_testing_digit(5);
-  for(int j=0; j<10; j++){
-    y->set_value(0,j,(float)(j==5));
-  }
-  model.predict(y_hat);
-  y_hat->print(cerr);
+
 }

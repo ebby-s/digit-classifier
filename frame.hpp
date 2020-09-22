@@ -37,7 +37,7 @@ public:
 
     for(int j=0; j<height; j++){
       for(int i=0; i<width; i++){
-        pixels[j*width+i] = min(max((int)((a->get_value(i,j)+1)*128),0),255);
+        pixels[j*width+i] = min(max((int)(a->get_value(i,j)*255),0),255);
       }
     }
   }
@@ -49,7 +49,7 @@ public:
     max_val = 255;
 
     for(int j=0; j<width; j++){
-      pixels[j] = min(max((int)((x[j]+1)*128),0),255);
+      pixels[j] = min(max((int)(x[j]*255),0),255);
     }
   }
 
