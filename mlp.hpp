@@ -29,15 +29,9 @@ public:
   }
   Matrix* get_weight(int layer){return weight[layer];}  // get pointer to weight matrix of a layer
 
-  void clear_momentum(){                          // resets momentum
-    for(int i=0; i<delta_weight.size(); i++){
-      delta_weight[i]->clear();
-    }
-  }
-
-  void add_layer(int size){    // add a layer with randomly initialized parameters
+  void add_layer(int size, int rand_a, int rand_b, int rand_c){    // add a layer with randomly initialized parameters
     weight.push_back(new Matrix(layers.back(), size));
-    weight.back()->load_random();
+    weight.back()->load_random(rand_a, rand_b, rand_c);
     delta_weight.push_back(new Matrix(layers.back(), size));
     layers.push_back(size);
   }
@@ -56,7 +50,7 @@ public:
     vector<double> dzdw, dzdz, next_dzdz;       // holds derivatives
     Matrix y_hat(28, 28);
 
-    for(int n=0; n<n_cycles; n++){     // iterate over batch size n
+    for(int n=0; n<n_cycles; n++){     // iterate over sample n times
 
       y_hat = *x;
       a.push_back(new Matrix(*x));
@@ -109,8 +103,8 @@ public:
       }
     }
 
-    //for(int i=0; i<weight.size(); i++){   // update parameters
-      //weight[i]->add(delta_weight[i]);
-    //}
+    for(int i=0; i<delta_weight.size(); i++){
+      delta_weight[i]->clear();
+    }
   }
 };

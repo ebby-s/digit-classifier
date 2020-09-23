@@ -43,9 +43,9 @@ public:
     (*values)[dims[1]*row + col] = val;
   }
 
-  void load_random(){          // loads matrix with random values
+  void load_random(double rand_a, double rand_b, double rand_c){     // loads matrix with random values centered around 0
     for(int i=0; i<values->size(); i++){
-      (*values)[i] = (rand()%2) * (rand()%6)/10;
+      (*values)[i] = 2.0*(double)(rand()%2)-1.0 * (((double)rand()%rand_a)+rand_b)/rand_c;
     }
   }
 

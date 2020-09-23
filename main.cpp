@@ -11,43 +11,46 @@
 using namespace std;
 
 int main(){
-  MLP model(784, 0.00001, 0.7);
-  model.add_layer(128);
-  model.add_layer(10);
+  MLP model(784, 0.0001, 0.9);
+  model.add_layer(128, 6, 0, 10);
+  model.add_layer(10, 10, 1, 100);
 
-  vector<string> files;
-  string data_path = "./data/data";
-  for(int i=0; i<10; i++){
-    data_path.append(to_string(i));
-    files.push_back(data_path);
-    data_path.pop_back();
-  }
-  Dataset data(files, 1000, 800);
+  string train_data_name = "./data/train-images-idx3-ubyte.gz";
+  string train_label_name = "./data/train-labels-idx1-ubyte.gz";
+  string test_data_name = "./data/t10k-images-idx3-ubyte.gz";
+  string test_label_name = "./data/t10k-labels-idx1-ubyte.gz";
+  Dataset data(train_data_name, train_label_name, test_data_name, test_label_name);
 
-  Matrix* x, *y, *y_hat;
-  y = new Matrix(1, 10);
-  int sample_digit;
+  pair<Matrix*,Matrix*> sample;
+  pair<int,float> train_result;      // stores iterations trained and final error after a training cycle
 
   Frame debug_frame(28, 28, 255);
-  vector<float> losses;
-  losses.assign(10,0);
 
+  for(int i=0; i<60000; i++){
 
-  for(int i=0; i<100; i++){        // main loop i
-    sample_digit = rand()%10;
-    for(int l=0; l<10; l++){y->set_value(0,l,(float)(sample_digit==l));}
-    x = data.get_training_digit(sample_digit);
-    model.train(x, y, 500);
-    model.clear_momentum();
+    sample = data.get_training_sample();
 
-    if(i%8==0){
-      y_hat = data.get_testing_digit((sample_digit+3)%10);
-      model.predict(y_hat);
-      //cerr << i << ' ' << calculate_loss(y_hat, y) << endl;
-      cerr << i << ' ' << sample_digit << endl;
-      y_hat->print(cerr);
-      delete y_hat;
+    cerr << "Data:" << endl;
+    for int j=0; j<28; j++){
+      for(int k=0; k<28; k++){
+        cerr << sample[0]->get_value(j,k);
+      }
+      cerr << endl;
     }
+    cerr << "Label:" << endl;
+    for(int j=0; j<10; j++){
+      cerr << sample[1]->get_value(0,j);
+    }
+    cerr << endl;
+
+    train_result = model.train(sample[0], sample[1], 512);
+
+    cerr << "Sample " << i << endl;
+		if (sample % 100 == 0) {   // Save the current network (weights)
+			cout << "Saving the network to " << model_fn << " file." << endl;
+			write_matrix(model_fn);
+		}
+
   }
 
   y_hat = model.get_weight(0);
