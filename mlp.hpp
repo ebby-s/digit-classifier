@@ -21,11 +21,15 @@ private:
   vector<int> layers;     // size of each layer
   double learning_rate;
   double momentum;
+  int max_iterations;
+  float threshold;
 public:
-  MLP(int input_layer, double new_learning_rate, double new_momentum){
+  MLP(int input_layer, double new_learning_rate, double new_momentum, int new_max_iterations, float new_threshold){
     layers.push_back(input_layer);
     learning_rate = new_learning_rate;
     momentum = new_momentum;
+    max_iterations = new_max_iterations;
+    threshold = new_threshold;
   }
   Matrix* get_weight(int layer){return weight[layer];}  // get pointer to weight matrix of a layer
 
@@ -45,12 +49,21 @@ public:
     }
   }
 
-  void train(Matrix* x, Matrix* y, int n_cycles){
+  void save_to_file(string path){
+    ofstream dst(path);
+    for(int i=0; i<weight.size(); i++){
+      weight[i]->write_to_file(dst);
+    }
+  }
+
+  pair<int,float> train(Matrix* x, Matrix* y){
     vector<Matrix*> z, a;            // holds results from forward pass
     vector<double> dzdw, dzdz, next_dzdz;       // holds derivatives
     Matrix y_hat(28, 28);
+    int iterations=0;
+    float error;
 
-    for(int n=0; n<n_cycles; n++){     // iterate over sample n times
+    for(int n=0; n<max_iterations; n++){     // iterate over sample
 
       y_hat = *x;
       a.push_back(new Matrix(*x));
@@ -94,6 +107,10 @@ public:
         weight[i-1]->add(delta_weight[i-1]);
         dzdz = next_dzdz;
       }
+
+      error = calculate_loss(a.back(), y);
+      iterations++;
+
       delete a.back();          // delete all new matrices created during the process
       for(int i=0; i<z.size(); i++){
         delete a[i];
@@ -101,10 +118,13 @@ public:
       a.clear();
       z.clear();
       }
+
+      if(error<threshold){break;};
     }
 
     for(int i=0; i<delta_weight.size(); i++){
       delta_weight[i]->clear();
     }
+    return pair<int,float> (iterations,error);
   }
 };

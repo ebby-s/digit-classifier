@@ -2,59 +2,53 @@
 #include<fstream>
 #include<vector>
 #include<cmath>
-#include<random>
+#include<utility>
 #include "matrix.hpp"
-#include "frame.hpp"
 #include "dataset.hpp"
 #include "mlp.hpp"
 
 using namespace std;
 
 int main(){
-  MLP model(784, 0.0001, 0.9);
+  MLP model(784, 0.001, 0.9, 512, 0.002);
   model.add_layer(128, 6, 0, 10);
   model.add_layer(10, 10, 1, 100);
+  string model_file_name = "./model_weights.txt";
 
-  string train_data_name = "./data/train-images-idx3-ubyte.gz";
-  string train_label_name = "./data/train-labels-idx1-ubyte.gz";
-  string test_data_name = "./data/t10k-images-idx3-ubyte.gz";
-  string test_label_name = "./data/t10k-labels-idx1-ubyte.gz";
+  string train_data_name = "data/train-images.idx3-ubyte";
+  string train_label_name = "data/train-labels.idx1-ubyte";
+  string test_data_name = "data/t10k-images.idx3-ubyte";
+  string test_label_name = "data/t10k-labels.idx1-ubyte";
   Dataset data(train_data_name, train_label_name, test_data_name, test_label_name);
 
   pair<Matrix*,Matrix*> sample;
   pair<int,float> train_result;      // stores iterations trained and final error after a training cycle
-
-  Frame debug_frame(28, 28, 255);
 
   for(int i=0; i<60000; i++){
 
     sample = data.get_training_sample();
 
     cerr << "Data:" << endl;
-    for int j=0; j<28; j++){
+    for(int j=0; j<28; j++){
       for(int k=0; k<28; k++){
-        cerr << sample[0]->get_value(j,k);
+        cerr << get<0>(sample)->get_value(0,j*28+k);
       }
       cerr << endl;
     }
     cerr << "Label:" << endl;
     for(int j=0; j<10; j++){
-      cerr << sample[1]->get_value(0,j);
+      cerr << get<1>(sample)->get_value(0,j);
     }
     cerr << endl;
 
-    train_result = model.train(sample[0], sample[1], 512);
+    train_result = model.train(get<0>(sample), get<1>(sample));
 
     cerr << "Sample " << i << endl;
-		if (sample % 100 == 0) {   // Save the current network (weights)
-			cout << "Saving the network to " << model_fn << " file." << endl;
-			write_matrix(model_fn);
+    cerr << "Error: " << get<1>(train_result) << " after " << get<0>(train_result) << " iterations." << endl;
+		if (i%100==0){
+			cerr << "Saving the network" << endl;
+			model.save_to_file(model_file_name);
 		}
-
   }
-
-  y_hat = model.get_weight(0);
-  debug_frame.load_from_matrix(y_hat);
-  debug_frame.to_pgm(2);
-
+  data.close();
 }

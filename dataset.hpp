@@ -8,7 +8,7 @@ private:
   ifstream test_labels;
 public:
   Dataset(string train_data_name, string train_label_name, string test_data_name, string test_label_name){
-    u_char inchar;
+    char inchar;
     train_data.open(train_data_name);
     train_labels.open(train_label_name);
     test_data.open(test_data_name);
@@ -33,38 +33,33 @@ public:
 
   pair<Matrix*, Matrix*> get_training_sample(){
     pair<Matrix*, Matrix*> sample;
-    sample[0] = new Matrix(1,784);
-    sample[1] = new Matrix(1,10);
+    get<0>(sample) = new Matrix(1,784);
+    get<1>(sample) = new Matrix(1,10);
 
-    u_char inchar;
-    for (int i=0; i<28; i++){
-      for (int j=0; j<28; j++){
-        train_data.read(&inchar, sizeof(inchar));
-        if (inchar==0){sample[0]->set_value(0,j+i*28,0);}
-  			else{sample[0]->set_value(0,j+i*28,1);}
-      }
-  	}
+    char inchar;
+    for (int i=0; i<784; i++){
+      train_data.read(&inchar, sizeof(inchar));
+      get<0>(sample)->set_value(0,i,inchar!=0);
+    }
+
     train_labels.read(&inchar, sizeof(inchar));
-    sample[1]->set_value(0,atoi(inchar),1);
+    get<1>(sample)->set_value(0,(int)(inchar),1);
 
     return sample;
   }
 
   pair<Matrix*, Matrix*> get_testing_sample(){
     pair<Matrix*, Matrix*> sample;
-    sample[0] = new Matrix(1,784);
-    sample[1] = new Matrix(1,10);
+    get<0>(sample) = new Matrix(1,784);
+    get<1>(sample) = new Matrix(1,10);
 
-    u_char inchar;
-    for (int i=0; i<28; i++){
-      for (int j=0; j<28; j++){
-        test_data.read(&inchar, sizeof(inchar));
-        if (inchar==0){sample[0]->set_value(0,j+i*28,0);}
-  			else{sample[0]->set_value(0,j+i*28,1);}
-      }
-  	}
+    char inchar;
+    for (int i=0; i<784; i++){
+      test_data.read(&inchar, sizeof(inchar));
+      get<0>(sample)->set_value(0,i,inchar!=0);
+    }
     test_labels.read(&inchar, sizeof(inchar));
-    sample[1]->set_value(0,atoi(inchar),1);
+    get<1>(sample)->set_value(0,(int)(inchar),1);
 
     return sample;
   }

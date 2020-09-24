@@ -43,9 +43,9 @@ public:
     (*values)[dims[1]*row + col] = val;
   }
 
-  void load_random(double rand_a, double rand_b, double rand_c){     // loads matrix with random values centered around 0
+  void load_random(int rand_a, int rand_b, int rand_c){     // loads matrix with random values centered around 0
     for(int i=0; i<values->size(); i++){
-      (*values)[i] = 2.0*(double)(rand()%2)-1.0 * (((double)rand()%rand_a)+rand_b)/rand_c;
+      (*values)[i] = (2.0*(double)(rand()%2)-1.0) * ((double)(rand()%rand_a)+rand_b)/rand_c;
     }
   }
 
@@ -86,6 +86,13 @@ public:
       if(i%dims[1]==0){dst << '[' << ' ';}
       dst << (*values)[i] << ' ';
       if((i+1)%dims[1]==0){dst << ']' << endl;}
+    }
+  }
+
+  void write_to_file(ofstream &dst){        // writes matrix to a file
+    for(int i=0; i<values->size(); i++){
+      dst << (*values)[i] << " ";
+      if(i%dims[1]==0){dst << endl;}
     }
   }
 };
