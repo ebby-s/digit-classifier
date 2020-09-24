@@ -29,13 +29,11 @@ int main(){
     sample = data.get_training_sample();
 
     cerr << "Data:" << endl;
-    for(int j=0; j<28; j++){
-      for(int k=0; k<28; k++){
-        cerr << get<0>(sample)->get_value(0,j*28+k);
-      }
-      cerr << endl;
+    for(int j=0; j<784; j++){
+      if(j%28==0){cerr << endl;}
+      cerr << get<0>(sample)->get_value(0,j);
     }
-    cerr << "Label:" << endl;
+    cerr << endl << "Label:" << endl;
     for(int j=0; j<10; j++){
       cerr << get<1>(sample)->get_value(0,j);
     }
